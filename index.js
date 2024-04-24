@@ -12,7 +12,7 @@ const { signinPage, createUser, login, getUser } = require("./controllers/signin
 
 connectToMongo();
 const app = express()
-const port = 5000
+const port = process.env.PORT || 3300
 
 app.use(express.json());
 
