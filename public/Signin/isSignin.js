@@ -32,9 +32,11 @@ document.addEventListener("DOMContentLoaded", async function () {
       if (user.role === 'admin') {
           // Show the upload button
           document.getElementById('uploadOptionforaddingFlags').classList.remove('hidden');
+          document.getElementById('uploadForm').classList.remove('hidden');
       } else {
           // Hide the upload button
           document.getElementById('uploadOptionforaddingFlags').classList.add('hidden');
+          document.getElementById('uploadForm').classList.add('hidden');
       }
   }
 });

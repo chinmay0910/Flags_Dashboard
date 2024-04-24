@@ -12,7 +12,7 @@ const { signinPage, createUser, login, getUser } = require("./controllers/signin
 
 connectToMongo();
 const app = express()
-const port = process.env.PORT || 3300
+const port = process.env.PORT || 80
 
 app.use(express.json());
 
@@ -29,7 +29,7 @@ app.set('views', path.join(__dirname, 'views'))
 // Multer configuration for handling file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, './uploads'); // Destination folder for uploaded files
+    cb(null, './public/uploads'); // Destination folder for uploaded files
   },
   filename: function (req, file, cb) {
     cb(null, Date.now() + '-' + file.originalname); // Unique filename for uploaded files
@@ -111,6 +111,54 @@ app.post('/upload', upload.single('file'), async (req, res) => {
       res.status(500).json({ message: 'Internal server error' });
     }
   });
+
+  // Define route for uploading Excel file
+  app.post('/upload-users', upload.single('file'), async (req, res) => {
+    try {
+        const workbook = XLSX.readFile(req.file.path);
+        const sheetName = workbook.SheetNames[0];
+        const sheet = workbook.Sheets[sheetName];
+        const teamNameColumn = 'A';
+        const emailColumn = 'B';
+        const passwordColumn = 'C';
+
+        const usersData = [];
+        let i = 2; // Assuming the data starts from row 2
+        while (true) {
+            const teamCell = sheet[teamNameColumn + i];
+            const emailCell = sheet[emailColumn + i];
+            const passwordCell = sheet[passwordColumn + i];
+
+            // Break the loop if any of the cells are empty
+            if (!teamCell || !teamCell.v || !emailCell || !emailCell.v || !passwordCell || !passwordCell.v) {
+                break;
+            }
+
+            usersData.push({
+                teamName: teamCell.v,
+                email: emailCell.v,
+                password: passwordCell.v
+            });
+
+            i++;
+        }
+
+        // Create users from the data
+        const users = await Promise.all(usersData.map(async (userData) => {
+            const { teamName, email, password } = userData;
+            const existingUser = await User.findOne({ email });
+            if (existingUser) {
+                return existingUser;
+            }
+            return User.create({ name: teamName, email, password });
+        }));
+
+        res.status(200).json({ message: 'Users created successfully', users });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 
 app.listen(port,()=>{

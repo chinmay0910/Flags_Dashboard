@@ -85,9 +85,16 @@ section .signin .content
   flex-direction: column;
   gap: 40px;
 }
-section .signin .content h2 
+section .signin .content h2
 {
-  font-size: 2em;
+  font-size: 1.8em;
+  color: #0f0;
+  text-transform: uppercase;
+}
+
+section .signin .content h4
+{
+  font-size: 0.8em;
   color: #0f0;
   text-transform: uppercase;
 }
